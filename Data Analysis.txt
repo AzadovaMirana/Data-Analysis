@@ -1,0 +1,69 @@
+
+
+With   
+
+Employee_Details as 
+(select
+        a.employee_id,
+        a.first_name || ' ' || a.last_name as full_name,
+        b.job_title,
+        a.salary,
+        c.department_name
+from
+        employees a
+left join
+        jobs b on a.job_id = b.job_id
+left join
+        departments c on a.department_id = c.department_id),
+        
+Job_History_Summary as
+(select
+        employee_id,
+        min(start_date) as first_hire_date,
+        count(start_date) as count_job_changes,
+        max(start_date) as last_hire_date
+from
+        job_history
+group by
+        employee_id),
+        
+First_Job_Details as
+(select
+        a.employee_id,
+        a.start_date,
+        b.job_title || ',' || c.department_name as first_job
+from
+        job_history a
+left join
+        jobs b on a.job_id = b.job_id
+left join
+        departments c on a.department_id = c.department_id)
+select
+    Tab1.employee_id,
+    Tab1.full_name,
+    Tab1.job_title,
+    Tab1.salary,
+    Tab1.department_name,
+    Tab2.first_hire_date,
+    Tab3.first_job,
+    Tab2.last_hire_date,
+    Tab2.count_job_changes
+from
+    Employee_Details Tab1
+right join
+    Job_History_Summary Tab2 on Tab1.employee_id = Tab2.employee_id
+left join
+    First_Job_Details Tab3 on Tab2.employee_id = Tab3.employee_id
+                       and Tab2.first_hire_date = Tab3.start_date
+GROUP BY
+    Tab1.employee_id,
+    Tab1.full_name,
+    Tab1.job_title,
+    Tab1.salary,
+    Tab1.department_name,
+    Tab2.first_hire_date,
+    Tab3.first_job,
+    Tab2.last_hire_date,
+    Tab2.count_job_changes;
+    
+ 
